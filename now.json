@@ -1,12 +1,15 @@
 {
   "name": "gsheet-hubdb-sync",
   "version": 2,
+  "public": false,
   "build": {
     "env": {
-      "HS_API_KEY": "@hapikey"
+      "HS_API_KEY": "@hapikey",
+      "HS_PORTAL_ID": "@portalid"
     }
   },
   "env": {
-    "HS_API_KEY": "@hapikey"
+    "HS_API_KEY": "@hapikey",
+    "HS_PORTAL_ID": "@portalid"
   }
 }

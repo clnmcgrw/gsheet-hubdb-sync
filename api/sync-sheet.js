@@ -23,21 +23,22 @@ module.exports = async (req, res) => {
         const rowMatch = await hubdbClient.getFilteredTableRows(hubdbTableId, {
           vendor_id: row.locationid,
         });
+
         // if a match exists
-        if (rowMatch.objects.length === 1) {
+        if (rowMatch.objects && rowMatch.objects.length === 1) {
           const rowMatchVals = rowMatch.objects[0].values;
           const rowMatchId = rowMatch.objects[0].id;
           // check if any cell values have changed
           const needsUpdate = getRowValuesChanged(hubdbValues, rowMatchVals);
 
           if (needsUpdate) {
-            await hubdb.updateTableRow(hubdbTableId, rowMatchId, hubdbValues);
+            await hubdbClient.updateTableRow(hubdbTableId, rowMatchId, hubdbValues);
             updatedRows++;
           }
         // if no match exists
         } else {
           // create a new hubdb row
-          await hubdb.addTableRow(hubdbTableId, hubdbValues); 
+          await hubdbClient.addTableRow(hubdbTableId, hubdbValues);
           newRows++;
         }
 
