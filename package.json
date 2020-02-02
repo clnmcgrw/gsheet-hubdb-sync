@@ -17,6 +17,7 @@
     "bottleneck": "^2.19.5",
     "debug": "^4.1.1",
     "google-spreadsheet": "^2.0.8",
+    "lodash": "^4.17.15",
     "node-fetch": "^2.6.0"
   }
 }
