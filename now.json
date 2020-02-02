@@ -1,0 +1,12 @@
+{
+  "name": "gsheet-hubdb-sync",
+  "version": 2,
+  "build": {
+    "env": {
+      "HS_API_KEY": "@hapikey"
+    }
+  },
+  "env": {
+    "HS_API_KEY": "@hapikey"
+  }
+}

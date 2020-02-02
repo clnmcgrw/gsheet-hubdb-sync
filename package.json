@@ -1,0 +1,22 @@
+{
+  "name": "gsheet-hubdb-sync",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "local": "now dev --listen=4000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^8.2.0"
+  },
+  "dependencies": {
+    "bottleneck": "^2.19.5",
+    "debug": "^4.1.1",
+    "google-spreadsheet": "^2.0.8",
+    "node-fetch": "^2.6.0"
+  }
+}
