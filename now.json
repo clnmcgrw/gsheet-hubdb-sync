@@ -4,12 +4,12 @@
   "public": false,
   "build": {
     "env": {
-      "HS_API_KEY": "@hapikey",
-      "HS_PORTAL_ID": "@portalid"
+      "HS_API_KEY": "@koihapikey",
+      "HS_PORTAL_ID": "@koiportalid"
     }
   },
   "env": {
-    "HS_API_KEY": "@hapikey",
-    "HS_PORTAL_ID": "@portalid"
+    "HS_API_KEY": "@koihapikey",
+    "HS_PORTAL_ID": "@koiportalid"
   }
 }

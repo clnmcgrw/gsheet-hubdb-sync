@@ -9,6 +9,13 @@ const sheetId = '1ELP2bRhfDs7QKHhdnnzVbH_7Q1R7LBjwYGqRJFhZvfg';
 module.exports = async (req, res) => {
   let updatedRows = 0;
   let newRows = 0;
+  
+  if (!req.query.key || req.query.key !== 'koicbd') {
+    res.json({
+      status: 'error',
+      message: 'Invalid Authorization',
+    });
+  }
 
   console.log('Starting sync...');
   try {
