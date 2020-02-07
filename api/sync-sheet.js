@@ -16,50 +16,62 @@ module.exports = async (req, res) => {
     const locations = await gsheetClient.getLocationsFromSheet(sheetId);
     console.log(`Got locations from sheet, ${locations.length} rows found...`);
 
-    // iterate over rows
+    // all hubdb table rows
+    const tableRows = await hubdbClient.getAllTableRows(hubdbTableId);
+    console.log('Table Rows: ', tableRows.objects.length);
+
+
+    // iterate over gsheet rows
     for (let i=0; i < locations.length; i++) {
+      console.log(`Processing row #${i}...`);
       const row = locations[i];
-      const hubdbValues = getHubdbRowFromSheet(row);
 
-      // query table for existing match
-      const rowMatch = await hubdbClient.getFilteredTableRows(hubdbTableId, {
-        vendor_id: row.locationid,
-      });
+      if (row.latitude && row.longitude) {
+        const hubdbValues = getHubdbRowFromSheet(row);
 
-      // if a match exists
-      if (rowMatch.objects && rowMatch.objects.length === 1) {
-        const rowMatchVals = rowMatch.objects[0].values;
-        const rowMatchId = rowMatch.objects[0].id;
-        // check if any cell values have changed
-        const rowsIdentical = getRowValueEquality(hubdbValues, rowMatchVals);
-        console.log('Row values are identical: ', rowsIdentical);
+        // query table for existing match
+        // const rowMatch = await hubdbClient.getFilteredTableRows(hubdbTableId, {vendor_id: row.locationid});
 
-        if (!rowsIdentical) {
-          console.log('Updating row...');
-          await hubdbClient.updateTableRow(hubdbTableId, rowMatchId, hubdbValues);
-          console.log('Row updated: ', rowMatchId);
-          updatedRows++;
+        const [rowMatch] = tableRows.objects.filter(r => row.locationid === r.values['2']);
+        //console.log('Row Match: ', rowMatch);
+
+        // if a match exists
+        if (rowMatch) {
+          const rowMatchVals = rowMatch.values;
+          const rowMatchId = rowMatch.id;
+
+          // check if any cell values have changed
+          const rowsIdentical = getRowValueEquality(hubdbValues, rowMatchVals);
+          console.log('Row values are identical: ', rowsIdentical);
+
+          if (!rowsIdentical) {
+            console.log(`Updating row ${i}...`);
+            await hubdbClient.updateTableRow(hubdbTableId, rowMatchId, hubdbValues);
+            console.log('Row updated: ', rowMatchId);
+            updatedRows++;
+          }
+        // if no match exists
+        } else {
+          console.log('Creating row...');
+          // create a new hubdb row
+          const createdRow = await hubdbClient.addTableRow(hubdbTableId, hubdbValues);
+          console.log('Row created: ', createdRow.id);
+          newRows++;
         }
-      // if no match exists
-      } else {
-        console.log('Creating row...');
-        // create a new hubdb row
-        const createdRow = await hubdbClient.addTableRow(hubdbTableId, hubdbValues);
-        console.log('Row created: ', createdRow.id);
-        newRows++;
       }
     } // end iteration
 
-    console.log('Iteration finished, publishing table...');
     // publish table after updates
-    await hubdbClient.publishTable(hubdbTableId);
-    console.log('Table published!');
+    if (updatedRows > 0 || newRows > 0) {
+      console.log('Publishing table...');
+      await hubdbClient.publishTable(hubdbTableId);
+      console.log('Table published!');
+    }
 
     res.json({
       status: 'ok',
       message: `Sync complete - updated ${updatedRows} | created ${newRows}`,
     });
-
   } catch (e) {
     // something failed
     res.json({
