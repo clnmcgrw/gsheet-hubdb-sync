@@ -5,11 +5,15 @@
   "build": {
     "env": {
       "HS_API_KEY": "@koihapikey",
-      "HS_PORTAL_ID": "@koiportalid"
+      "HS_PORTAL_ID": "@koiportalid",
+      "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@koigoogleemail",
+      "GOOGLE_SERVICE_ACCOUNT_KEY": "@koigooglekey"
     }
   },
   "env": {
     "HS_API_KEY": "@koihapikey",
-    "HS_PORTAL_ID": "@koiportalid"
+    "HS_PORTAL_ID": "@koiportalid",
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@koigoogleemail",
+    "GOOGLE_SERVICE_ACCOUNT_KEY": "@koigooglekey"
   }
 }

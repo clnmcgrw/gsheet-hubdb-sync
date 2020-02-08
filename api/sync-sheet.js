@@ -9,18 +9,19 @@ const sheetId = '1ELP2bRhfDs7QKHhdnnzVbH_7Q1R7LBjwYGqRJFhZvfg';
 module.exports = async (req, res) => {
   let updatedRows = 0;
   let newRows = 0;
-  
+
   if (!req.query.key || req.query.key !== 'koicbd') {
     res.json({
       status: 'error',
       message: 'Invalid Authorization',
     });
+    return;
   }
 
   console.log('Starting sync...');
   try {
     // all rows from sheet
-    const locations = await gsheetClient.getLocationsFromSheet(sheetId);
+    const locations = await gsheetClient.getRowsFromSheet(sheetId);
     console.log(`Got locations from sheet, ${locations.length} rows found...`);
 
     // all hubdb table rows
