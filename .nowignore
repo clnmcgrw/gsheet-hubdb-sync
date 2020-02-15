@@ -1,0 +1,5 @@
+.env
+.env.local
+.env.build
+service-account-creds.json
+service-key.txt

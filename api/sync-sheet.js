@@ -1,10 +1,19 @@
+const Sentry = require('@sentry/node');
 const hubdbClient = require('../lib/hubdb-client');
 const gsheetClient = require('../lib/gsheet-client');
-const { getHubdbRowFromSheet, getRowValueEquality } = require('../lib/data-transform');
+const {
+  getHubdbRowFromSheet,
+  getRowValueEquality,
+  validateRow,
+} = require('../lib/data-transform');
 
-const hubdbTableId = '2054297';
+const hubdbTableId = '2594637';
 const sheetId = '1ELP2bRhfDs7QKHhdnnzVbH_7Q1R7LBjwYGqRJFhZvfg';
 
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  //debug: process.env.NODE_ENV === 'development',
+});
 
 module.exports = async (req, res) => {
   let updatedRows = 0;
@@ -26,46 +35,59 @@ module.exports = async (req, res) => {
 
     // all hubdb table rows
     const tableRows = await hubdbClient.getAllTableRows(hubdbTableId);
-    console.log('Table Rows: ', tableRows.objects.length);
-
+    console.log('Table Rows: ', tableRows.total);
 
     // iterate over gsheet rows
     for (let i=0; i < locations.length; i++) {
       console.log(`Processing row #${i}...`);
       const row = locations[i];
+      const validity = validateRow(row);
 
-      if (row.latitude && row.longitude) {
+      // console.log('Gsheet row: ', row);
+      // throw new Error('Stop script');
+
+      // if row has existing location id
+      if (validity.hasId) {
+        const [rowMatch] = tableRows.objects.filter(r => row.LOCATIONID === r.values['2']);
         const hubdbValues = getHubdbRowFromSheet(row);
-
-        // query table for existing match
-        // const rowMatch = await hubdbClient.getFilteredTableRows(hubdbTableId, {vendor_id: row.locationid});
-
-        const [rowMatch] = tableRows.objects.filter(r => row.locationid === r.values['2']);
-        //console.log('Row Match: ', rowMatch);
 
         // if a match exists
         if (rowMatch) {
-          const rowMatchVals = rowMatch.values;
-          const rowMatchId = rowMatch.id;
-
           // check if any cell values have changed
-          const rowsIdentical = getRowValueEquality(hubdbValues, rowMatchVals);
+          const rowsIdentical = getRowValueEquality(hubdbValues, rowMatch.values);
           console.log('Row values are identical: ', rowsIdentical);
 
           if (!rowsIdentical) {
             console.log(`Updating row ${i}...`);
-            await hubdbClient.updateTableRow(hubdbTableId, rowMatchId, hubdbValues);
-            console.log('Row updated: ', rowMatchId);
+            await hubdbClient.updateTableRow(hubdbTableId, rowMatch.id, hubdbValues);
+            console.log('Row updated: ', rowMatch.id);
             updatedRows++;
           }
         // if no match exists
         } else {
-          console.log('Creating row...');
+          console.log('No match, creating row...');
           // create a new hubdb row
           const createdRow = await hubdbClient.addTableRow(hubdbTableId, hubdbValues);
           console.log('Row created: ', createdRow.id);
           newRows++;
         }
+
+      // no id present in sheet row
+      } else {
+
+        // first create id in gsheet
+        console.log('Creating id...');
+        const newRowId = new Date().getTime().toString();
+        row.LOCATIONID = newRowId;
+        await row.save();
+        console.log(`Row updated with id ${newRowId}`);
+
+        // then create a new hubdb row
+        console.log('Creating row...');
+        const hubdbValues = getHubdbRowFromSheet(row);
+        const createdRow = await hubdbClient.addTableRow(hubdbTableId, hubdbValues);
+        console.log('Row created: ', createdRow.id);
+        newRows++;
       }
     } // end iteration
 
@@ -81,6 +103,8 @@ module.exports = async (req, res) => {
       message: `Sync complete - updated ${updatedRows} | created ${newRows}`,
     });
   } catch (e) {
+    Sentry.captureException(e);
+    await Sentry.flush(2000);
     // something failed
     res.json({
       status: 'error',
