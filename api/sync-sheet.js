@@ -7,7 +7,7 @@ const {
   validateRow,
 } = require('../lib/data-transform');
 
-const hubdbTableId = '2594637';
+const hubdbTableId = '2594730';
 const sheetId = '1ELP2bRhfDs7QKHhdnnzVbH_7Q1R7LBjwYGqRJFhZvfg';
 
 Sentry.init({
@@ -74,6 +74,8 @@ module.exports = async (req, res) => {
 
       // no id present in sheet row
       } else {
+
+        throw new Error('Everyhtin sould have ids....');
 
         // first create id in gsheet
         console.log('Creating id...');
