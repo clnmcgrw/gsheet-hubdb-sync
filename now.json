@@ -7,13 +7,15 @@
       "HS_API_KEY": "@koihapikey",
       "HS_PORTAL_ID": "@koiportalid",
       "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@koigoogleemail",
-      "GOOGLE_SERVICE_ACCOUNT_KEY": "@koigooglekey"
+      "GOOGLE_SERVICE_ACCOUNT_KEY": "@koigooglekey",
+      "SENTRY_DSN": "@koisentrydsn"
     }
   },
   "env": {
     "HS_API_KEY": "@koihapikey",
     "HS_PORTAL_ID": "@koiportalid",
     "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@koigoogleemail",
-    "GOOGLE_SERVICE_ACCOUNT_KEY": "@koigooglekey"
+    "GOOGLE_SERVICE_ACCOUNT_KEY": "@koigooglekey",
+    "SENTRY_DSN": "@koisentrydsn"
   }
 }
