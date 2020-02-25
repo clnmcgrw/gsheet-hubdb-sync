@@ -8,7 +8,8 @@
       "HS_PORTAL_ID": "@koiportalid",
       "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@koigoogleemail",
       "GOOGLE_SERVICE_ACCOUNT_KEY": "@koigooglekey",
-      "SENTRY_DSN": "@koisentrydsn"
+      "SENTRY_DSN": "@koisentrydsn",
+      "MAPBOX_API_KEY": "@koimapboxkey"
     }
   },
   "env": {
@@ -16,6 +17,7 @@
     "HS_PORTAL_ID": "@koiportalid",
     "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@koigoogleemail",
     "GOOGLE_SERVICE_ACCOUNT_KEY": "@koigooglekey",
-    "SENTRY_DSN": "@koisentrydsn"
+    "SENTRY_DSN": "@koisentrydsn",
+    "MAPBOX_API_KEY": "@koimapboxkey"
   }
 }

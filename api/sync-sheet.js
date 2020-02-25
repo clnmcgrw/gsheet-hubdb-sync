@@ -1,6 +1,7 @@
 const Sentry = require('@sentry/node');
 const hubdbClient = require('../lib/hubdb-client');
 const gsheetClient = require('../lib/gsheet-client');
+const { addressToLatLng } = require('../lib/geocoder');
 const {
   getHubdbRowFromSheet,
   getRowValueEquality,
@@ -10,20 +11,15 @@ const {
 const hubdbTableId = '2594730';
 const sheetId = '1ELP2bRhfDs7QKHhdnnzVbH_7Q1R7LBjwYGqRJFhZvfg';
 
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  //debug: process.env.NODE_ENV === 'development',
-});
+Sentry.init({ dsn: process.env.SENTRY_DSN });
+
 
 module.exports = async (req, res) => {
   let updatedRows = 0;
   let newRows = 0;
 
   if (!req.query.key || req.query.key !== 'koicbd') {
-    res.json({
-      status: 'error',
-      message: 'Invalid Authorization',
-    });
+    res.json({  status: 'error',  message: 'Invalid Authorization'});
     return;
   }
 
@@ -72,21 +68,27 @@ module.exports = async (req, res) => {
           newRows++;
         }
 
-      // no id present in sheet row
+      // no id present in sheet row, create as new
       } else {
-
-        throw new Error('Everyhtin sould have ids....');
-
         // first create id in gsheet
         console.log('Creating id...');
         const newRowId = new Date().getTime().toString();
         row.LOCATIONID = newRowId;
+        
+        // get lat/lng from address
+        console.log('Getting lat/lng...');
+        const newRowLocation = await addressToLatLng(row);
+        if (newRowLocation) {
+          row.Latitude = newRowLocation.latitude;
+          row.Longitude = newRowLocation.longitude;
+        }
+        
+        // save row changes in gsheet
         await row.save();
         console.log(`Row updated with id ${newRowId}`);
 
-        // then create a new hubdb row
-        console.log('Creating row...');
-        const hubdbValues = getHubdbRowFromSheet(row);
+        console.log('Creating hubdb row...');
+        const hubdbValues = getHubdbRowFromSheet(row); // row values have been updated
         const createdRow = await hubdbClient.addTableRow(hubdbTableId, hubdbValues);
         console.log('Row created: ', createdRow.id);
         newRows++;
